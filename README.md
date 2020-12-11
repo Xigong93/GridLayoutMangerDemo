@@ -1,22 +1,23 @@
-# GridLayoutManager 如何均分
-默认效果是这样
+# How the GridLayoutManager average each item.
+Default effect
 ![image.png](https://upload-images.jianshu.io/upload_images/3290652-75fdeb830aad8b1a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
 
-期望的效果是这样
+Expected effect
 ![image.png](https://upload-images.jianshu.io/upload_images/3290652-6ef3db3130a8d1ac.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-**期望是每一行类似ConstraintLayout中的chain spread inside**
+**Expect every row like ConstraintLayout chain spread inside**
 ![image.png](https://upload-images.jianshu.io/upload_images/3290652-57cac4485a0f2bc6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-**虚线是GridLayoutManger 默认的每个item的left**
+**Dash line is GridLayoutManger default each item's left**
 
-怎么实现呢，了解一下下面的计算细则？
--  虚线的位置是spanIndex*spanWidth
-- item.left=虚线的位置+ItemDecoration.left
-所以通过设置itemDecoration.left 就可以完成
+How to implement？You need know blew point.
+-  Dash line  is spanIndex*spanWidth
+- item.left= Dash line location+ItemDecoration.left
 
-下面直接给出计算的代码
+So through set itemDecoration.left ,we could implement the average effect.
+
+The Code
 ```kotlin
 private class AverageGridItemDecoration : RecyclerView.ItemDecoration() {
 
@@ -39,8 +40,8 @@ private class AverageGridItemDecoration : RecyclerView.ItemDecoration() {
         for (child in parent) {
             val adapterPosition = parent.getChildAdapterPosition(child)
             val columnIndex = spanSizeLookup.getSpanIndex(adapterPosition, spanCount)
-            // 核心代码:
-            // left = 期望的left- 默认的left
+            // Core line:
+            // left = expect left- default left
             outRect.left =  ((itemWidth + spanMargin) * columnIndex - spanWidth * columnIndex).toInt()
             if (spanSizeLookup.getSpanGroupIndex(adapterPosition, spanCount) > 0) {
                 outRect.top = dp2px(15f).toInt()
