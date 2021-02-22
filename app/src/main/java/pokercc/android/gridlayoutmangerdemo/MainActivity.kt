@@ -69,12 +69,11 @@ private class DefaultItemDecoration : RecyclerView.ItemDecoration() {
         val layoutManager = parent.layoutManager as? GridLayoutManager ?: return
         val spanCount = layoutManager.spanCount
         val spanSizeLookup = layoutManager.spanSizeLookup
-        for (child in parent) {
-            val adapterPosition = parent.getChildAdapterPosition(child)
-            if (spanSizeLookup.getSpanGroupIndex(adapterPosition, spanCount) > 0) {
-                outRect.top = dp2px(15f).toInt()
-            }
+        val adapterPosition = parent.getChildAdapterPosition(view)
+        if (spanSizeLookup.getSpanGroupIndex(adapterPosition, spanCount) > 0) {
+            outRect.top = dp2px(15f).toInt()
         }
+
     }
 }
 
@@ -90,21 +89,24 @@ private class AverageGridItemDecoration : RecyclerView.ItemDecoration() {
         val layoutManager = parent.layoutManager as? GridLayoutManager ?: return
         val spanCount = layoutManager.spanCount
         val parentWidth = parent.measuredWidth - parent.paddingStart - parent.paddingEnd
+        // 每一条的宽度的获取，我这里是直接写死了一个值.
+        // 当然你也可以动态计算或者测量出来，但是不能直接使用view.getWidth(),因为此时有可能还没有完成布局
         val itemWidth = view.resources.getDimension(R.dimen.course_practice_result_item_size)
         val spanWidth = parentWidth / spanCount
         if (spanCount == 1) return
         val spanMargin = (parentWidth - itemWidth * spanCount) / (spanCount - 1)
         val spanSizeLookup = layoutManager.spanSizeLookup
-
-        for (child in parent) {
-            val adapterPosition = parent.getChildAdapterPosition(child)
-            val columnIndex = spanSizeLookup.getSpanIndex(adapterPosition, spanCount)
-            outRect.left =
-                ((itemWidth + spanMargin) * columnIndex - spanWidth * columnIndex).toInt()
-            if (spanSizeLookup.getSpanGroupIndex(adapterPosition, spanCount) > 0) {
-                outRect.top = dp2px(15f).toInt()
-            }
+        val adapterPosition = parent.getChildAdapterPosition(view)
+        val columnIndex = spanSizeLookup.getSpanIndex(adapterPosition, spanCount)
+        // 核心代码:
+        // 左边的间距 = 期望的left- 默认的left
+        outRect.left =
+            ((itemWidth + spanMargin) * columnIndex - spanWidth * columnIndex).toInt()
+        // 不是第一行的情况，设置上边距
+        if (spanSizeLookup.getSpanGroupIndex(adapterPosition, spanCount) > 0) {
+            outRect.top = dp2px(15f).toInt()
         }
+
     }
 }
 
